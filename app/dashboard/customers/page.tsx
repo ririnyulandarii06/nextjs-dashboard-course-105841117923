@@ -1,3 +1,4 @@
+// app/dashboard/customers/page.tsx
 import Table from '@/app/ui/customers/table';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
@@ -13,12 +14,11 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
+  searchParams?: Promise<{ query?: string; page?: string }>;
 }) {
-  const query = searchParams?.query || '';
+  const params = await searchParams; // <-- Harus await dulu!
+  const query = params?.query || '';
+
   const customers = await fetchFilteredCustomers(query);
 
   return (
@@ -29,7 +29,7 @@ export default async function Page({
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Search customers..." />
       </div>
-      <Suspense key={query} fallback={<InvoicesTableSkeleton />}>
+      <Suspense fallback={<InvoicesTableSkeleton />}>
         <Table customers={customers} />
       </Suspense>
     </div>
