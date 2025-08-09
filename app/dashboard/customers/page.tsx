@@ -1,10 +1,10 @@
-// app/dashboard/customers/page.tsx
-import Table from '@/app/ui/customers/table';
+import Table from '@/app/ui/customers/table'; 
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchFilteredCustomers } from '@/app/lib/data';
+import { formatCurrency } from '@/app/lib/utils';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -14,12 +14,20 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Promise<{ query?: string; page?: string }>;
+  searchParams?: Promise<{
+    query?: string;
+    page?: string;
+  }>;
 }) {
-  const params = await searchParams; // <-- Harus await dulu!
-  const query = params?.query || '';
+  const params = searchParams ? await searchParams : {};
+  const query = params.query || '';
+  const customersRaw = await fetchFilteredCustomers(query);
 
-  const customers = await fetchFilteredCustomers(query);
+  const customers = customersRaw.map((customer) => ({
+    ...customer,
+    total_pending: formatCurrency(customer.total_pending),
+    total_paid: formatCurrency(customer.total_paid),
+  }));
 
   return (
     <div className="w-full">

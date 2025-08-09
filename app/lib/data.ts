@@ -1,11 +1,10 @@
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
-  CustomersTableType,  // <-- perbaikan di sini
+  CustomersTableType,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
-  User,
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
@@ -166,7 +165,7 @@ export async function fetchCustomers() {
 export async function fetchFilteredCustomers(query: string) {
   noStore();
   try {
-    const customers = await sql<CustomersTableType>`  // <-- pakai CustomersTableType
+    const customers = await sql<CustomersTableType>`
       SELECT customers.id, customers.name, customers.email, customers.image_url,
              COUNT(invoices.id) AS total_invoices,
              SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
