@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import {
   CustomerField,
-  CustomersTable,
+  CustomersTableType,  // <-- perbaikan di sini
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
@@ -55,10 +55,11 @@ export async function fetchCardData() {
   try {
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    const invoiceStatusPromise = sql`SELECT
+    const invoiceStatusPromise = sql`
+      SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-         FROM invoices`;
+      FROM invoices`;
 
     const data = await Promise.all([
       invoiceCountPromise,
@@ -165,7 +166,7 @@ export async function fetchCustomers() {
 export async function fetchFilteredCustomers(query: string) {
   noStore();
   try {
-    const customers = await sql<CustomersTable>`
+    const customers = await sql<CustomersTableType>`  // <-- pakai CustomersTableType
       SELECT customers.id, customers.name, customers.email, customers.image_url,
              COUNT(invoices.id) AS total_invoices,
              SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
