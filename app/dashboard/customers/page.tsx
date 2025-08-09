@@ -1,9 +1,9 @@
 import Table from '@/app/ui/customers/table';
 import { lusitana } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
-import { InvoicesTableSkeleton } from '@/app/ui/skeletons'; // Reuse the skeleton
+import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchFilteredCustomers } from '@/app/lib/data'; // Import the data fetching function
+import { fetchFilteredCustomers } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default async function Page({
   };
 }) {
   const query = searchParams?.query || '';
-  const customers = await fetchFilteredCustomers(query); // Fetch the data here
+  const customers = await fetchFilteredCustomers(query);
 
   return (
     <div className="w-full">
