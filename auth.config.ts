@@ -5,9 +5,7 @@ export const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
   },
-  providers: [
-    // Ini diperlukan, bahkan jika kosong
-  ],
+  providers: [],
   callbacks: {
     authorized({ auth, request: { nextUrl } }: { auth: Session | null; request: NextRequest }) {
       const isLoggedIn = !!auth?.user;
