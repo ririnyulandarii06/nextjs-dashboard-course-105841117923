@@ -2,7 +2,7 @@ import type { NextAuthConfig } from 'next-auth';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
-import credentials from 'next-auth/providers/credentials';
+import Credentials from 'next-auth/providers/credentials';
 
 // Simulasi mendapatkan pengguna dari database
 async function getUser(email: string) {
@@ -15,7 +15,7 @@ async function getUser(email: string) {
   }
 }
 
-export const authConfig = {
+export const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
   },
@@ -31,9 +31,21 @@ export const authConfig = {
       }
       return true;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.userId = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.userId as string;
+      }
+      return session;
+    },
   },
   providers: [
-    credentials({
+    Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
@@ -64,4 +76,6 @@ export const authConfig = {
       },
     }),
   ],
-} satisfies NextAuthConfig;
+  // Tambahkan secret untuk NextAuth
+  secret: process.env.AUTH_SECRET,
+}
