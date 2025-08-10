@@ -1,14 +1,13 @@
-import type { NextAuthConfig, Session } from 'next-auth';
-import type { NextRequest } from 'next/server';
-
+import type { NextAuthConfig } from 'next-auth';
+ 
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
   },
-  // Tambahkan properti providers yang kosong di sini
+  // Properti providers tetap diperlukan di sini
   providers: [],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }: { auth: Session | null; request: NextRequest }) {
+    authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
