@@ -1,4 +1,10 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
  
-export const { auth, signIn, signOut } = NextAuth(authConfig);
+// Mengekspor auth, signIn, signOut, dan handler dari NextAuth
+export const {
+  auth,
+  signIn,
+  signOut,
+  handlers, // Export handlers di sini
+} = NextAuth(authConfig);
