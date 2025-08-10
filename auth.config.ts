@@ -1,27 +1,14 @@
-import type { NextAuthConfig } from 'next-auth';
-import { z } from 'zod';
-import { sql } from '@vercel/postgres';
-import bcrypt from 'bcrypt';
-import Credentials from 'next-auth/providers/credentials';
+import type { NextAuthConfig, Session } from 'next-auth';
+import type { NextRequest } from 'next/server';
 
-// Fungsi untuk mengambil pengguna dari database
-async function getUser(email: string) {
-  try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0];
-  } catch (error) {
-    console.error('Gagal mengambil pengguna:', error);
-    throw new Error('Gagal mengambil pengguna.');
-  }
-}
-
-// Konfigurasi utama untuk NextAuth
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: '/login',
   },
+  // Tambahkan properti providers yang kosong di sini
+  providers: [],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request: { nextUrl } }: { auth: Session | null; request: NextRequest }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
@@ -32,40 +19,5 @@ export const authConfig: NextAuthConfig = {
       }
       return true;
     },
-    async jwt({ token, user }) {
-      if (user) {
-        token.userId = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.userId as string;
-      }
-      return session;
-    },
   },
-  providers: [
-    Credentials({
-      async authorize(credentials) {
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
-          .safeParse(credentials);
-
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          if (!user) return null;
-
-          const passwordsMatch = await bcrypt.compare(password, user.password);
-
-          if (passwordsMatch) return user;
-        }
-
-        console.log('Kredensial tidak valid');
-        return null;
-      },
-    }),
-  ],
-  secret: process.env.AUTH_SECRET,
 };
