@@ -21,26 +21,23 @@ export const authConfig: NextAuthConfig = {
     signIn: '/login',
   },
   callbacks: {
-    // Callback ini memeriksa apakah pengguna diizinkan mengakses halaman dashboard
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false; // Redirect pengguna yang belum terautentikasi ke halaman login
+        return false;
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
       return true;
     },
-    // Callback ini menambahkan ID pengguna ke token JWT
     async jwt({ token, user }) {
       if (user) {
         token.userId = user.id;
       }
       return token;
     },
-    // Callback ini menambahkan ID pengguna dari token ke objek sesi
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.userId as string;
@@ -48,35 +45,21 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
   },
-  // Menentukan penyedia (provider) autentikasi
   providers: [
     Credentials({
       async authorize(credentials) {
-        // Validasi input email dan sandi
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
-          
-          // Ambil pengguna dari database berdasarkan email
           const user = await getUser(email);
-          if (!user) {
-            console.log('Pengguna tidak ditemukan.');
-            return null;
-          }
+          if (!user) return null;
 
-          // Verifikasi sandi dengan bcrypt
           const passwordsMatch = await bcrypt.compare(password, user.password);
 
-          if (passwordsMatch) {
-            console.log('Sandi cocok!');
-            return user; // Berhasil login
-          } else {
-            console.log('Sandi tidak valid.');
-            return null; // Gagal login
-          }
+          if (passwordsMatch) return user;
         }
 
         console.log('Kredensial tidak valid');
@@ -84,6 +67,5 @@ export const authConfig: NextAuthConfig = {
       },
     }),
   ],
-  // NextAuth memerlukan secret untuk mengenkripsi sesi
   secret: process.env.AUTH_SECRET,
 };
