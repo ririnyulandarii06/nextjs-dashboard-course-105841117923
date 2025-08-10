@@ -1,10 +1,8 @@
-import { authConfig } from '../auth.config';
-import NextAuth from 'next-auth';
+import { auth } from '@/auth';
 
-// Inisialisasi NextAuth dengan konfigurasi Anda
-export const { auth: middleware } = NextAuth(authConfig);
+export default auth;
 
 export const config = {
-  // Otorisasi hanya untuk rute ini
+  // Hanya mengizinkan middleware untuk rute yang tidak termasuk dalam daftar ini
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
