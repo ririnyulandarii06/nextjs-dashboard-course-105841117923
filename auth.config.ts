@@ -17,13 +17,11 @@ async function getUser(email: string) {
 
 // Konfigurasi utama untuk NextAuth
 export const authConfig: NextAuthConfig = {
-  // Halaman untuk login
   pages: {
     signIn: '/login',
   },
-  // Callbacks untuk mengontrol alur otorisasi dan sesi
   callbacks: {
-    // Memeriksa apakah pengguna diizinkan mengakses halaman dashboard
+    // Callback ini memeriksa apakah pengguna diizinkan mengakses halaman dashboard
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
