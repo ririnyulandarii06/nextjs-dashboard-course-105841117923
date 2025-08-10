@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
 import credentials from 'next-auth/providers/credentials';
- 
+
 // Simulasi mendapatkan pengguna dari database
 async function getUser(email: string) {
   try {
@@ -14,9 +14,8 @@ async function getUser(email: string) {
     throw new Error('Failed to fetch user.');
   }
 }
- 
+
 export const authConfig = {
-  // Tambahkan konfigurasi halaman di sini
   pages: {
     signIn: '/login',
   },
@@ -36,22 +35,30 @@ export const authConfig = {
   providers: [
     credentials({
       async authorize(credentials) {
-        // Validasi skema kredensial
         const parsedCredentials = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
- 
+
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
-          if (!user) return null;
- 
-          // Membandingkan sandi
+          if (!user) {
+            console.log('User not found.');
+            return null;
+          }
+
+          // Verifikasi sandi dengan bcrypt
           const passwordsMatch = await bcrypt.compare(password, user.password);
- 
-          if (passwordsMatch) return user;
+
+          if (passwordsMatch) {
+            console.log('Passwords match!');
+            return user;
+          } else {
+            console.log('Invalid password.');
+            return null;
+          }
         }
- 
+
         console.log('Invalid credentials');
         return null;
       },
