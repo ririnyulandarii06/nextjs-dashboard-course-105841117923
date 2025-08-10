@@ -1,7 +1,13 @@
 import { db, VercelPoolClient } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
-import { invoices, customers, revenue, users } from '../app/lib/placeholder-data.js';
+import {
+  invoices,
+  customers,
+  revenue,
+  users,
+} from '../app/lib/placeholder-data.js';
 
+// Menambahkan definisi tipe data untuk mengatasi error TypeScript
 type User = {
   id: string;
   name: string;
@@ -31,6 +37,7 @@ type Revenue = {
 async function seedUsers(client: VercelPoolClient) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS users (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -46,10 +53,10 @@ async function seedUsers(client: VercelPoolClient) {
       (users as User[]).map(async (user) => {
         const hashedPassword = await bcrypt.hash(user.password, 10);
         return client.sql`
-          INSERT INTO users (id, name, email, password)
-          VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
-          ON CONFLICT (id) DO NOTHING;
-        `;
+        INSERT INTO users (id, name, email, password)
+        VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
+        ON CONFLICT (id) DO NOTHING;
+      `;
       }),
     );
 
@@ -68,14 +75,15 @@ async function seedUsers(client: VercelPoolClient) {
 async function seedInvoices(client: VercelPoolClient) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
     const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS invoices (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        customer_id UUID NOT NULL,
-        amount INT NOT NULL,
-        status VARCHAR(255) NOT NULL,
-        date DATE NOT NULL
-      );
+    CREATE TABLE IF NOT EXISTS invoices (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID NOT NULL,
+    amount INT NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    date DATE NOT NULL
+    );
     `;
 
     console.log(`Created "invoices" table`);
@@ -83,10 +91,10 @@ async function seedInvoices(client: VercelPoolClient) {
     const insertedInvoices = await Promise.all(
       (invoices as Invoice[]).map(
         (invoice) => client.sql`
-          INSERT INTO invoices (customer_id, amount, status, date)
-          VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
-          ON CONFLICT (id) DO NOTHING;
-        `,
+        INSERT INTO invoices (customer_id, amount, status, date)
+        VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
+        ON CONFLICT (id) DO NOTHING;
+      `,
       ),
     );
 
@@ -105,6 +113,7 @@ async function seedInvoices(client: VercelPoolClient) {
 async function seedCustomers(client: VercelPoolClient) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
     const createTable = await client.sql`
       CREATE TABLE IF NOT EXISTS customers (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -119,10 +128,10 @@ async function seedCustomers(client: VercelPoolClient) {
     const insertedCustomers = await Promise.all(
       (customers as Customer[]).map(
         (customer) => client.sql`
-          INSERT INTO customers (id, name, email, image_url)
-          VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
-          ON CONFLICT (id) DO NOTHING;
-        `,
+        INSERT INTO customers (id, name, email, image_url)
+        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+        ON CONFLICT (id) DO NOTHING;
+      `,
       ),
     );
 
@@ -152,10 +161,10 @@ async function seedRevenue(client: VercelPoolClient) {
     const insertedRevenue = await Promise.all(
       (revenue as Revenue[]).map(
         (rev) => client.sql`
-          INSERT INTO revenue (month, revenue)
-          VALUES (${rev.month}, ${rev.revenue})
-          ON CONFLICT (month) DO NOTHING;
-        `,
+        INSERT INTO revenue (month, revenue)
+        VALUES (${rev.month}, ${rev.revenue})
+        ON CONFLICT (month) DO NOTHING;
+      `,
       ),
     );
 
@@ -173,14 +182,20 @@ async function seedRevenue(client: VercelPoolClient) {
 
 async function main() {
   const client = await db.connect();
-  await seedUsers(client);
-  await seedCustomers(client);
-  await seedInvoices(client);
-  await seedRevenue(client);
-
-  // Tidak perlu panggil client.end()
+  try {
+    await seedUsers(client);
+    await seedCustomers(client);
+    await seedInvoices(client);
+    await seedRevenue(client);
+  } finally {
+    // Pastikan koneksi dilepas meskipun ada kesalahan
+    client.release();
+  }
 }
 
 main().catch((err) => {
-  console.error('An error occurred while attempting to seed the database:', err);
+  console.error(
+    'An error occurred while attempting to seed the database:',
+    err,
+  );
 });
