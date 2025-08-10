@@ -2,7 +2,7 @@ import type { NextAuthConfig } from 'next-auth';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import bcrypt from 'bcrypt';
-import credentials from 'next-auth/providers/credentials'; // Tambahkan baris ini!
+import credentials from 'next-auth/providers/credentials';
  
 // Simulasi mendapatkan pengguna dari database
 async function getUser(email: string) {
@@ -16,9 +16,24 @@ async function getUser(email: string) {
 }
  
 export const authConfig = {
-  // Array providers untuk mendefinisikan metode login
+  // Tambahkan konfigurasi halaman di sini
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
+      if (isOnDashboard) {
+        if (isLoggedIn) return true;
+        return false; // Redirect unauthenticated users to login page
+      } else if (isLoggedIn) {
+        return Response.redirect(new URL('/dashboard', nextUrl));
+      }
+      return true;
+    },
+  },
   providers: [
-    // Provider `credentials` untuk autentikasi email dan sandi
     credentials({
       async authorize(credentials) {
         // Validasi skema kredensial
