@@ -193,6 +193,8 @@ export async function fetchFilteredCustomers(query: string) {
   }
 }
 
+// Lokasi: app/lib/data.ts
+
 export async function fetchInvoiceById(id: string) {
   noStore();
   try {
@@ -208,13 +210,15 @@ export async function fetchInvoiceById(id: string) {
 
     const invoice = data.rows.map((invoice) => ({
       ...invoice,
-      // Convert amount from cents to dollars
       amount: invoice.amount / 100,
     }));
 
-    return invoice[0];
+    // Jika invoice tidak ada, invoice[0] akan undefined, ini sudah benar.
+    return invoice[0]; 
   } catch (error) {
+    // Jika ada error database, jangan gagalkan build, cukup log error.
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    // Kembalikan null agar halaman bisa menampilkan notFound()
+    return null;
   }
 }
