@@ -1,17 +1,40 @@
-import AcmeLogo from '@/app/ui/acme-logo';
-import LoginForm from '@/app/ui/login-form';
- 
+"use client";
+
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await signIn("credentials", {
+      redirect: true,
+      email,
+      password,
+      callbackUrl: "/dashboard",
+    });
+  };
+
   return (
-    <main className="flex items-center justify-center md:h-screen">
-      <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
-        <div className="flex h-20 w-full items-end rounded-lg bg-blue-500 p-3 md:h-36">
-          <div className="w-32 text-white md:w-36">
-            <AcmeLogo />
-          </div>
-        </div>
-        <LoginForm />
-      </div>
-    </main>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <input
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        className="border p-2"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+        className="border p-2"
+      />
+      <button type="submit" className="bg-blue-500 text-white p-2">
+        Login
+      </button>
+    </form>
   );
 }
