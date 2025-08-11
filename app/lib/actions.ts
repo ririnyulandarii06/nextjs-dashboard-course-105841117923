@@ -1,24 +1,27 @@
 'use server';
- 
+
+import { signIn, signOut } from '@/auth'; // Pastikan signOut diimpor dari @/auth
 import { AuthError } from 'next-auth';
-import { signIn } from '@/auth';
- 
-// Pastikan ada kata kunci 'export' di sini
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
   try {
-    await signIn('credentials', Object.fromEntries(formData));
+    await signIn('credentials', formData);
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
-          return 'Kredensial tidak valid.';
+          return 'Invalid credentials.';
         default:
-          return 'Terjadi kesalahan.';
+          return 'Something went wrong.';
       }
     }
     throw error;
   }
+}
+
+export async function handleSignOut() {
+  await signOut();
 }

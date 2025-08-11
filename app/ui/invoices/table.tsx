@@ -1,4 +1,7 @@
+// Lokasi: app/ui/invoices/table.tsx
+
 import Image from 'next/image';
+// 1. Impor komponen tombol "Update" dan "Delete"
 import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
@@ -17,6 +20,7 @@ export default async function InvoicesTable({
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          {/* Tampilan untuk mobile */}
           <div className="md:hidden">
             {invoices?.map((invoice) => (
               <div
@@ -46,6 +50,7 @@ export default async function InvoicesTable({
                     </p>
                     <p>{formatDateToLocal(invoice.date)}</p>
                   </div>
+                  {/* 2. Tambahkan tombol di sini untuk tampilan mobile */}
                   <div className="flex justify-end gap-2">
                     <UpdateInvoice id={invoice.id} />
                     <DeleteInvoice id={invoice.id} />
@@ -54,6 +59,7 @@ export default async function InvoicesTable({
               </div>
             ))}
           </div>
+          {/* Tampilan untuk desktop */}
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
@@ -107,6 +113,7 @@ export default async function InvoicesTable({
                   <td className="whitespace-nowrap px-3 py-3">
                     <InvoiceStatus status={invoice.status} />
                   </td>
+                  {/* 3. Tambahkan kolom terakhir di sini untuk tampilan desktop */}
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
                       <UpdateInvoice id={invoice.id} />

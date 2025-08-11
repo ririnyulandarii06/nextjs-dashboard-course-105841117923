@@ -1,6 +1,9 @@
+// Lokasi: app/ui/invoices/buttons.tsx
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
+// Tombol untuk membuat invoice baru
 export function CreateInvoice() {
   return (
     <Link
@@ -13,10 +16,11 @@ export function CreateInvoice() {
   );
 }
 
+// Tombol untuk mengedit invoice
 export function UpdateInvoice({ id }: { id: string }) {
   return (
     <Link
-      href="/dashboard/invoices"
+      href={`/dashboard/invoices/${id}/edit`}
       className="rounded-md border p-2 hover:bg-gray-100"
     >
       <PencilIcon className="w-5" />
@@ -24,13 +28,14 @@ export function UpdateInvoice({ id }: { id: string }) {
   );
 }
 
-export function DeleteInvoice({ id }: { id: string }) {
+// Tombol untuk menghapus invoice
+export function DeleteInvoice({ id }: { id:string }) {
+  // Catatan: Logika penghapusan akan kita tambahkan nanti
+  // Untuk sekarang, kita hanya akan menampilkan tombolnya.
   return (
-    <>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </>
+    <button className="rounded-md border p-2 hover:bg-gray-100">
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </button>
   );
 }
